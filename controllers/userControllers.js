@@ -335,20 +335,18 @@ module.exports = {
     },
     getUser: async (req, res, next) => {
         try {
-            console.log('ji')
+            console.log('ji');
             const receivers = req.query.receivers;
-            console.log(receivers)
-            const membersData = await receivers.map((receiver) => {
-                usermodel.find({ _id: receiver })
-
-            })
-            console.log(membersData)
-            res.status(200).json({ success: true })
-
-        }
-        catch (err) {
-            console.log(err)
-            res.status(500).json({ message: "something went wrong ", success: false });
+            console.log(receivers);
+            const membersData = await Promise.all(receivers.map(async (receiver) => {
+                return await usermodel.find({ _id: receiver });
+            }));
+            console.log(membersData);
+            res.status(200).json({ success: true, membersData });
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({ message: "Something went wrong", success: false });
         }
     }
+
 }

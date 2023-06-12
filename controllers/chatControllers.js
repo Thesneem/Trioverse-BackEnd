@@ -2,22 +2,24 @@ const chatmodel = require('../models/chatModel')
 const messagemodel = require('../models/messageModel')
 const usermodel = require('../models/userModel')
 const listingmodel = require('../models/listingModel')
+const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = {
     createChat: async (req, res, next) => {
         try {
-            const senderId = req.user.id
-            console.log(senderId)
-            const { receiver_id } = req.body
-            console.log('reci', receiver_id)
-            const isExist = await chatmodel.find({ members: { $all: [senderId, receiver_id] } })
-            if (!isExist) {
-                const newChat = new chatmodel({
-                    members: [senderId, receiver_id],
-                });
 
-                const result = await newChat.save();
-                res.status(201).json(result);
+
+            const senderId = req.user.id
+            const { receiver_id } = req.body
+            const isExist = await chatmodel.find({ members: { $all: [senderId, receiver_id] } });
+            console.log(isExist)
+            if (isExist.length === 0) {
+                const newChat = new chatmodel({
+                    members: [senderId, receiver_id]
+                })
+                await newChat.save()
+                res.status(201).json('OK');
             }
             else {
                 res.status(200).json(isExist)
@@ -35,7 +37,7 @@ module.exports = {
             console.log('testDATA', req.user.id)
             const chat = await chatmodel.find({
                 members: { $in: [req.user.id] },
-            });
+            }).populate('members')
             res.status(200).json(chat);
         }
         catch (err) {
