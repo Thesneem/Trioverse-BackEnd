@@ -347,6 +347,18 @@ module.exports = {
             console.log(err);
             res.status(500).json({ message: "Something went wrong", success: false });
         }
+    },
+    allListings: async (req, res, next) => {
+        try {
+            const listings = await listingmodel.find({}).populate('seller_id')
+            console.log(listings)
+            res.status(200).json({ success: true, listings });
+
+        }
+        catch (err) {
+            console.log(err);
+            res.status(500).json({ message: "Something went wrong", success: false });
+        }
     }
 
 }

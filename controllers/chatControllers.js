@@ -38,6 +38,9 @@ module.exports = {
             const chat = await chatmodel.find({
                 members: { $in: [req.user.id] },
             }).populate('members')
+
+            console.log(chat)
+
             res.status(200).json(chat);
         }
         catch (err) {
@@ -60,13 +63,16 @@ module.exports = {
     addMessage: async (req, res, next) => {
         try {
             const { chatId, senderId, text } = req.body;
+            console.log('hii', req.body)
             const message = new messagemodel({
-                chatId,
-                senderId,
-                text,
+                chatId: chatId,
+                senderId: senderId,
+                text: text
             });
+
             const result = await message.save();
-            res.status(200).json(result)
+
+            res.status(201).json(result)
         }
         catch (err) {
             console.log(err)
@@ -76,8 +82,10 @@ module.exports = {
     getMessages: async (req, res, next) => {
         try {
             const { chatId } = req.params;
-            const result = await messagemodel.find({ chatId });
-            res.status(200).json(result);
+            console.log(chatId)
+            const messages = await messagemodel.find({ chatId });
+            console.log(messages)
+            res.status(200).json(messages);
         }
         catch (err) {
             console.log(err)

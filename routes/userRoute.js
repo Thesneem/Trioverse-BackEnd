@@ -16,6 +16,7 @@ router.get('/selectcategory/:id', usercontroller.selectcategory)
 router.get('/getSellerListings', verifyJWT, usercontroller.getSellerListings)
 router.get('/getListing/:id', verifyJWT, usercontroller.getListing)
 router.get('/getUser', usercontroller.getUser)
+router.get('/allListings', usercontroller.allListings)
 
 router.post('/signup', usercontroller.signup)
 router.post('/verifyOtp', usercontroller.verifyOtp)
@@ -39,7 +40,7 @@ router.get('/findchat/:firstId/:secondId', verifyJWT, chatcontroller.findChat);
 
 router.post('/addmessage', verifyJWT, chatcontroller.addMessage);
 
-router.get('/getmessage/:chatId', verifyJWT, chatcontroller.getMessages);
+router.get('/getmessages/:chatId', verifyJWT, chatcontroller.getMessages);
 
 
 
