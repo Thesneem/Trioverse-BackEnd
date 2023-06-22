@@ -2,8 +2,8 @@ const chatmodel = require('../models/chatModel')
 const messagemodel = require('../models/messageModel')
 const usermodel = require('../models/userModel')
 const listingmodel = require('../models/listingModel')
-const mongoose = require('mongoose');
-const ObjectId = mongoose.Types.ObjectId;
+// const mongoose = require('mongoose');
+// const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = {
     createChat: async (req, res, next) => {

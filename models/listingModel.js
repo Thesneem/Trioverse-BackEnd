@@ -67,6 +67,11 @@ const listingSchema = new mongoose.Schema({
             ref: "orderData",
         }
     }],
+    listing_status: {
+        type: 'String',
+        default: 'Active'
+    }
+    ,
     reviews: [{
         reviewId: {
             type: mongoose.Schema.Types.ObjectId,

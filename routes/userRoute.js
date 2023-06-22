@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const usercontroller = require('../controllers/userControllers');
 const chatcontroller = require('../controllers/chatControllers')
+const ordercontroller = require('../controllers/orderController')
 const verifyJWT = require('../middleWares/verifyJWT')
 const { uploadImage } = require('../middleWares/multer')
 const { uploadFile } = require('../middleWares/fileUpload')
@@ -39,8 +40,11 @@ router.get('/findchat/:firstId/:secondId', verifyJWT, chatcontroller.findChat);
 //message routes
 
 router.post('/addmessage', verifyJWT, chatcontroller.addMessage);
-
 router.get('/getmessages/:chatId', verifyJWT, chatcontroller.getMessages);
+
+//order routes
+
+router.post('/createOrder', ordercontroller.createOrder)
 
 
 
