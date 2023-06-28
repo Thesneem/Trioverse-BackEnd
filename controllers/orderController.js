@@ -1,31 +1,127 @@
 require('dotenv').config(); // Load environment variables from .env file
 const Stripe = require('stripe');
 const usermodel = require('../models/userModel')
+const ordermodel = require('../models/orderModel')
 
 const stripe = new Stripe(process.env.Stripe_API)
 
 module.exports = {
+    stripe_PublishKey: async (req, res, next) => {
+        return res.status(200).json({
+            success: 'OK', result: process.env.STRIPE_PUBLISH
+        })
+    },
+
     createOrder: async (req, res, next) => {
         try {
             console.log('order controller reached')
+            //console.log(formData)
+            const { requirement, listing, item } = req.body
+            console.log('REQBODY GOT FROM CHECKOUT', req.body)
+            console.log(req.user.id)
+            const file = req.file.filename
+            const parsedListing = JSON.parse(listing);
+            const parsedItem = JSON.parse(item);
+            console.log(parsedListing, parsedItem)
 
             const paymentIntent = await stripe.paymentIntents.create({
-                //amount: listing?.price * 100,
-                amount: 1000,
+                amount: parsedItem?.price,
                 currency: "INR",
                 automatic_payment_methods: {
                     enabled: true,
                 },
             });
-
             console.log(paymentIntent)
+            console.log(parsedListing.category.categoryId.category)
+            console.log(parsedItem.shortDescription)
+            //creating an order
+            const newOrder = new ordermodel({
+                listing_id: parsedListing._id,
+                buyer_id: req.user.id,
+                seller_id: parsedListing.seller_id,
+                'order_requirements.requirements': requirement,
+                'order_requirements.file': file,
+                paymentIntent: paymentIntent.id,
+                order_Price: parsedItem?.price,
+                'order_Status.pending.state': true,
+                'order_Status.pending.date': Date.now(),
+                selectedListing_title: parsedListing.listingTitle,
+                listingDescription: parsedListing.description,
+                listing_category: parsedListing.category.categoryId.category,
+                listing_subcategory: parsedListing.category.subcategory,
+                listing_features: parsedListing.features,
+                images: parsedListing.images,
+                videos: parsedListing.videos,
+                files: parsedListing.files,
+                coverImage: parsedListing.coverImage,
+                'selected_Package.package': parsedItem.packageId.package,
+                'selected_Package.delivery_Time': parsedItem.delivery_Time,
+                'selected_Package.revisions': parsedItem.revisions,
+                'selected_Package.deliverables': parsedItem.deliverables,
+                'selected_Package.price': parsedItem.price,
+                'selected_Package.shortDescription': parsedItem.shortDescription,
+            })
+            console.log('OrderCreated', newOrder)
+            await newOrder.save()
+
             res.status(201).json({
-                clientSecret: paymentIntent.client_secret,
+                clientSecret: paymentIntent.client_secret, newOrder
             })
         }
         catch (err) {
             console.log(err)
             return res.status(500).json({ message: "Internal server error", success: false, err });
         }
+    },
+    getActiveOrder: async (req, res, next) => {
+        try {
+            const id = req.params.id
+            const order = await ordermodel.find({
+                $and: [{ listing_id: id }, { buyer_id: req.user.id }, {
+                    'order_Status.created.state': true
+                }, {
+                    $or: [{ 'order_Status.finished.state': false }, { 'order_Status.canceled.state': false }
+                    ]
+                }]
+            })
+            console.log(order)
+            res.status(200).json({ order })
+        }
+        catch (err) {
+            console.log(err)
+            return res.status(500).json({ message: "Internal server error", success: false, err });
+        }
+    },
+    confirmOrder: async (req, res, next) => {
+        try {
+            const { email, paymentIntent } = req.body
+            console.log(req.body)
+            const order = await ordermodel.updateOne({ paymentIntent: req.body.paymentIntent }, {
+                'order_Status.created.state': true,
+                'order_Status.created.date': Date.now()
+            })
+            console.log('confirmOrder', order)
+            res.status(200).json({ order })
+        }
+        catch (err) {
+            console.log(err)
+            return res.status(500).json({ message: "Internal server error", success: false, err });
+        }
+    },
+    allBuyOrders: async (req, res, next) => {
+        try {
+            console.log(req.user.id)
+            const orders = await ordermodel.find({
+                buyer_id: req.user.id, 'order_Status.created.state': true
+
+            })
+            console.log(orders)
+            res.status(200).json({ orders })
+        }
+        catch (err) {
+            console.log(err)
+            return res.status(500).json({ message: "Internal server error", success: false, err });
+        }
     }
+
 }

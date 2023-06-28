@@ -320,6 +320,21 @@ module.exports = {
             res.status(500).json({ message: "something went wrong ", success: false });
         }
     },
+    changeStatus: async (req, res, next) => {
+        try {
+            const listingId = req.params.id
+            console.log('hi block', listingId)
+            const listing = await listingmodel.findById(listingId)
+            console.log(listing)
+            listing.listing_status = listing.listing_status === 'Available' ? 'Unavailable' : 'Available';
+            await listing.save();
+            res.status(201).json({ type: 'success', listing })
+        }
+        catch (err) {
+            console.log(err)
+            res.status(500).json({ message: "something went wrong ", success: false });
+        }
+    },
     getListing: async (req, res, next) => {
         try {
             console.log(req.params.id)

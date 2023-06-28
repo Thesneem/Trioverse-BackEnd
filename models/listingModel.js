@@ -69,7 +69,7 @@ const listingSchema = new mongoose.Schema({
     }],
     listing_status: {
         type: 'String',
-        default: 'Active'
+        default: 'Available'
     }
     ,
     reviews: [{
@@ -81,6 +81,7 @@ const listingSchema = new mongoose.Schema({
     requirements: {
         type: String
     }
+
 }
 
 )

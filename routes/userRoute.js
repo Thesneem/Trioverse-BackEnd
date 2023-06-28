@@ -25,11 +25,14 @@ router.post('/login', usercontroller.login)
 router.post('/addProfileImage', verifyJWT, uploadImage.single("image"), usercontroller.AddProfileImage)
 router.post('/updateProfile', verifyJWT, usercontroller.updateProfile)
 router.post('/createSeller', verifyJWT, uploadFile.single("idProof"), usercontroller.createSeller)
+
 router.post('/createList', verifyJWT, listingFiles.fields([
     { name: 'coverImage', minCount: 1, maxCount: 1 },
     { name: 'images[]', minCount: 1 },
     { name: 'videos[]', maxCount: 1 }
 ]), usercontroller.createList);
+
+router.post('/changeListingStatus/:id', usercontroller.changeStatus)
 
 //chat routes
 
@@ -44,7 +47,13 @@ router.get('/getmessages/:chatId', verifyJWT, chatcontroller.getMessages);
 
 //order routes
 
-router.post('/createOrder', ordercontroller.createOrder)
+router.get('/stripe/publish_key', ordercontroller.stripe_PublishKey)
+router.get('/getActiveOrder/:id', verifyJWT, ordercontroller.getActiveOrder)
+router.get('/allBuyOrders', verifyJWT, ordercontroller.allBuyOrders)
+
+router.post('/createOrder', verifyJWT, uploadImage.single("file"), ordercontroller.createOrder)
+router.put('/confirmOrder', ordercontroller.confirmOrder)
+
 
 
 

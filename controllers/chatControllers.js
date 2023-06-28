@@ -8,8 +8,6 @@ const listingmodel = require('../models/listingModel')
 module.exports = {
     createChat: async (req, res, next) => {
         try {
-
-
             const senderId = req.user.id
             const { receiver_id } = req.body
             const isExist = await chatmodel.find({ members: { $all: [senderId, receiver_id] } });
