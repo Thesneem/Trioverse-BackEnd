@@ -113,10 +113,22 @@ module.exports = {
             console.log(req.user.id)
             const orders = await ordermodel.find({
                 buyer_id: req.user.id, 'order_Status.created.state': true
-
-            })
+            }).populate('seller_id')
             console.log(orders)
             res.status(200).json({ orders })
+        }
+        catch (err) {
+            console.log(err)
+            return res.status(500).json({ message: "Internal server error", success: false, err });
+        }
+    },
+    getOrder: async (req, res, next) => {
+        try {
+            const id = req.params.id
+            const order = await ordermodel.findOne({ _id: id }).populate('seller_id').populate('listing_id')
+            console.log(order)
+            res.status(200).json({ order })
+
         }
         catch (err) {
             console.log(err)
