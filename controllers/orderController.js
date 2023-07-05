@@ -125,10 +125,40 @@ module.exports = {
     getOrder: async (req, res, next) => {
         try {
             const id = req.params.id
-            const order = await ordermodel.findOne({ _id: id }).populate('seller_id').populate('listing_id')
+            const order = await ordermodel.findOne({ _id: id }).populate('seller_id').populate('listing_id').populate('buyer_id')
             console.log(order)
             res.status(200).json({ order })
 
+        }
+        catch (err) {
+            console.log(err)
+            return res.status(500).json({ message: "Internal server error", success: false, err });
+        }
+    },
+    allSellOrders: async (req, res, next) => {
+        try {
+            console.log(req.user.id)
+            const orders = await ordermodel.find({
+                seller_id: req.user.id, 'order_Status.created.state': true
+            }).populate('buyer_id')
+            console.log(orders)
+            res.status(200).json({ orders })
+        }
+        catch (err) {
+            console.log(err)
+            return res.status(500).json({ message: "Internal server error", success: false, err });
+        }
+    },
+    startOrder: async (req, res, next) => {
+        try {
+            id = req.params.id
+
+            const order = await ordermodel.updateOne({ _id: id }, {
+                'order_Status.started.state': true,
+                'order_Status.started.date': Date.now()
+            })
+            console.log('Order Started', order)
+            res.status(200).json({ order })
         }
         catch (err) {
             console.log(err)

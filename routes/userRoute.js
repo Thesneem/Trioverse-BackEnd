@@ -51,9 +51,11 @@ router.get('/stripe/publish_key', ordercontroller.stripe_PublishKey)
 router.get('/getActiveOrder/:id', verifyJWT, ordercontroller.getActiveOrder)
 router.get('/allBuyOrders', verifyJWT, ordercontroller.allBuyOrders)
 router.get('/getOrder/:id', ordercontroller.getOrder)
+router.get('/allSellOrders', verifyJWT, ordercontroller.allSellOrders)
 
 router.post('/createOrder', verifyJWT, uploadImage.single("file"), ordercontroller.createOrder)
 router.put('/confirmOrder', ordercontroller.confirmOrder)
+router.put('/startOrder/:id', ordercontroller.startOrder)
 
 
 
