@@ -196,8 +196,45 @@ module.exports = {
     },
     download: async (req, res, next) => {
         try {
-            let file = '../public/uploads/listingImages' + req.body
+            let item = req.params.id
+            console.log(item)
+            let file = './public/uploads/listingImages/' + req.params.id
             console.log(file)
+            res.download(file, item);
+        }
+        catch (err) {
+            console.log(err)
+            return res.status(500).json({ message: "Internal server error", success: false, err });
+        }
+    },
+    acceptOrder: async (req, res, next) => {
+        try {
+            const id = req.params.id
+            console.log(id)
+            const order = await ordermodel.findByIdAndUpdate({ _id: id }, {
+                $set: {
+                    'order_Status.finished.state': true,
+                    'order_Status.finished.date': Date.now()
+                }
+            })
+            res.status(200).json({ order })
+        }
+        catch (err) {
+            console.log(err)
+            return res.status(500).json({ message: "Internal server error", success: false, err });
+        }
+    },
+    returnDelivery: async (req, res, next) => {
+        try {
+            const id = req.params.id
+            console.log(id)
+            const order = await ordermodel.findByIdAndUpdate({ _id: id }, {
+                $set: {
+                    'order_Status.returned.state': true,
+                    'order_Status.returned.date': Date.now()
+                }
+            })
+            res.status(200).json({ order })
         }
         catch (err) {
             console.log(err)

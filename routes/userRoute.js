@@ -52,12 +52,14 @@ router.get('/getActiveOrder/:id', verifyJWT, ordercontroller.getActiveOrder)
 router.get('/allBuyOrders', verifyJWT, ordercontroller.allBuyOrders)
 router.get('/getOrder/:id', ordercontroller.getOrder)
 router.get('/allSellOrders', verifyJWT, ordercontroller.allSellOrders)
-router.get('/download', ordercontroller.download)
+router.get('/download/:id', ordercontroller.download)
 
 router.post('/createOrder', verifyJWT, uploadImage.single("file"), ordercontroller.createOrder)
 router.put('/confirmOrder', ordercontroller.confirmOrder)
 router.put('/startOrder/:id', ordercontroller.startOrder)
 router.post('/deliverOrder/:id', listingFiles.single('deliveryItem'), ordercontroller.deliverOrder)
+router.put('/acceptDelivery/:id', ordercontroller.acceptOrder)
+router.put('/returnDelivery/:id', ordercontroller.returnDelivery)
 
 
 
