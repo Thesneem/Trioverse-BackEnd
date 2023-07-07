@@ -54,6 +54,21 @@ const orderSchema = new mongoose.Schema({
             state: { type: Boolean, default: false },
             date: { type: Date, default: Date.now() },
         },
+        delivered: {
+            state: { type: Boolean, default: false },
+            details: [{
+                date: { type: Date, default: Date.now() },
+                delivery_Message: { type: String },
+                delivery_item: [{ type: String }]
+            }]
+        },
+        returned: {
+            state: { type: Boolean, default: false },
+            details: [{
+                date: { type: Date, default: Date.now() },
+                return_Message: { type: String }
+            }]
+        },
         finished: {
             state: { type: Boolean, default: false },
             date: { type: Date, default: Date.now() },

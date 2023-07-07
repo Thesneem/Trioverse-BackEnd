@@ -154,11 +154,50 @@ module.exports = {
             id = req.params.id
 
             const order = await ordermodel.updateOne({ _id: id }, {
-                'order_Status.started.state': true,
-                'order_Status.started.date': Date.now()
+                $set: {
+                    'order_Status.started.state': true,
+                    'order_Status.started.date': Date.now()
+                }
             })
             console.log('Order Started', order)
             res.status(200).json({ order })
+        }
+        catch (err) {
+            console.log(err)
+            return res.status(500).json({ message: "Internal server error", success: false, err });
+        }
+    },
+    deliverOrder: async (req, res, next) => {
+        try {
+            const orderId = req.params.id;
+            const deliveryMessage = req.body.deliveryMessage;
+            const deliveryItem = req.file.filename;
+            console.log('reached deliverorder', orderId, deliveryMessage, deliveryItem)
+            const order = await ordermodel.updateOne({ _id: orderId }, {
+                $set: {
+                    'order_Status.delivered.state': true
+                },
+                $push: {
+                    'order_Status.delivered.details': {
+                        date: Date.now(),
+                        delivery_Message: deliveryMessage,
+                        delivery_item: [deliveryItem]
+                    }
+                }
+            }
+            )
+            console.log('Order Started', order)
+            res.status(200).json({ order })
+        }
+        catch (err) {
+            console.log(err)
+            return res.status(500).json({ message: "Internal server error", success: false, err });
+        }
+    },
+    download: async (req, res, next) => {
+        try {
+            let file = '../public/uploads/listingImages' + req.body
+            console.log(file)
         }
         catch (err) {
             console.log(err)
