@@ -2,6 +2,7 @@ require('dotenv').config(); // Load environment variables from .env file
 const Stripe = require('stripe');
 const usermodel = require('../models/userModel')
 const ordermodel = require('../models/orderModel')
+const reviewmodel = require('../models/reviewModel')
 
 const stripe = new Stripe(process.env.Stripe_API)
 
@@ -76,7 +77,7 @@ module.exports = {
     getActiveOrder: async (req, res, next) => {
         try {
             const id = req.params.id
-            const order = await ordermodel.find({
+            const ActiveOrder = await ordermodel.find({
                 $and: [{ listing_id: id }, { buyer_id: req.user.id }, {
                     'order_Status.created.state': true
                 }, {
@@ -84,8 +85,8 @@ module.exports = {
                     ]
                 }]
             })
-            console.log(order)
-            res.status(200).json({ order })
+            console.log(ActiveOrder)
+            res.status(200).json({ ActiveOrder })
         }
         catch (err) {
             console.log(err)
@@ -175,7 +176,8 @@ module.exports = {
             console.log('reached deliverorder', orderId, deliveryMessage, deliveryItem)
             const order = await ordermodel.updateOne({ _id: orderId }, {
                 $set: {
-                    'order_Status.delivered.state': true
+                    'order_Status.delivered.state': true,
+                    'order_Status.returned.state': false,
                 },
                 $push: {
                     'order_Status.delivered.details': {
@@ -227,14 +229,99 @@ module.exports = {
     returnDelivery: async (req, res, next) => {
         try {
             const id = req.params.id
+            const returnMessage = req.body.returnMessage
+            console.log(returnMessage)
             console.log(id)
             const order = await ordermodel.findByIdAndUpdate({ _id: id }, {
                 $set: {
                     'order_Status.returned.state': true,
-                    'order_Status.returned.date': Date.now()
+                    'order_Status.delivered.state': false,
+                }, $push: {
+                    'order_Status.returned.details': {
+                        date: Date.now(),
+                        return_Message: returnMessage,
+                    }
                 }
             })
+            console.log(order)
             res.status(200).json({ order })
+        }
+        catch (err) {
+            console.log(err)
+            return res.status(500).json({ message: "Internal server error", success: false, err });
+        }
+    },
+    checkUserOrdered: async (req, res, next) => {
+        try {
+            const listingid = req.params.id
+            const buyer = req.user.id
+            console.log(listingid, buyer)
+            const hasOrdered = await ordermodel.find({
+                $and: [{ listing_id: listingid }, { buyer_id: buyer }, {
+                    'order_Status.created.state': true
+                }, {
+                    $or: [{ 'order_Status.finished.state': true }, { 'order_Status.canceled.state': true }
+                    ]
+                }]
+            })
+            res.status(200).json({ hasOrdered })
+        }
+        catch (err) {
+            console.log(err)
+            return res.status(500).json({ message: "Internal server error", success: false, err });
+        }
+    },
+    addReview: async (req, res, next) => {
+        try {
+            const listingid = req.params.id
+            const reviewer = req.user.id
+            const { review, rating } = req.body
+            console.log(req.body)
+            console.log('addREVIEW', listingid, reviewer)
+            if (!review) {
+                return res.status(400).json({ message: 'Review is required', success: false });
+            }
+            const newReview = await reviewmodel({
+                listing_id: listingid,
+                reviewer,
+                review,
+                rating,
+                created_At: Date.now()
+            })
+            newReview.save().then(() => {
+                res.status(201).json({ success: true, newReview });
+            })
+
+        }
+        catch (err) {
+            console.log(err)
+            return res.status(500).json({ message: "Internal server error", success: false, err });
+        }
+    },
+    allReviews: async (req, res, next) => {
+        try {
+            const listingid = req.params.id
+            const reviews = await reviewmodel.find({ listing_id: listingid }).populate('reviewer')
+            res.status(200).json({ reviews })
+        }
+        catch (err) {
+            console.log(err)
+            return res.status(500).json({ message: "Internal server error", success: false, err });
+        }
+    },
+    isReviewExist: async (req, res, next) => {
+        try {
+            const listingid = req.params.id
+            const reviewer = req.user.id
+            const isReviewExist = await reviewmodel.findOne({ listing_id: listingid, reviewer: reviewer })
+            console.log(isReviewExist)
+            if (isReviewExist) {
+                res.status(200).json({ ReviewExist: true })
+            } else {
+                res.status(200).json({ ReviewExist: false })
+
+            }
+
         }
         catch (err) {
             console.log(err)

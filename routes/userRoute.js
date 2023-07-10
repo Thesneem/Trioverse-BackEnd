@@ -53,15 +53,20 @@ router.get('/allBuyOrders', verifyJWT, ordercontroller.allBuyOrders)
 router.get('/getOrder/:id', ordercontroller.getOrder)
 router.get('/allSellOrders', verifyJWT, ordercontroller.allSellOrders)
 router.get('/download/:id', ordercontroller.download)
+router.get('/checkUserOrdered/:id', verifyJWT, ordercontroller.checkUserOrdered)
 
 router.post('/createOrder', verifyJWT, uploadImage.single("file"), ordercontroller.createOrder)
 router.put('/confirmOrder', ordercontroller.confirmOrder)
 router.put('/startOrder/:id', ordercontroller.startOrder)
 router.post('/deliverOrder/:id', listingFiles.single('deliveryItem'), ordercontroller.deliverOrder)
 router.put('/acceptDelivery/:id', ordercontroller.acceptOrder)
-router.put('/returnDelivery/:id', ordercontroller.returnDelivery)
+router.post('/returnDelivery/:id', ordercontroller.returnDelivery)
 
+//reviews and ratings
+router.get('/allReviews/:id', ordercontroller.allReviews)
+router.get('/isReviewExist/:id', verifyJWT, ordercontroller.isReviewExist)
 
+router.post('/addReview/:id', verifyJWT, ordercontroller.addReview)
 
 
 module.exports = router;
