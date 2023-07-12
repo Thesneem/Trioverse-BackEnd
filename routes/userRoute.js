@@ -11,7 +11,7 @@ const { listingFiles } = require('../middleWares/listingFiles')
 
 router.get('/resendOtp', usercontroller.resendOtp)
 router.get('/profile', verifyJWT, usercontroller.profile)
-router.get('/categories', verifyJWT, usercontroller.categories)
+router.get('/categories', usercontroller.categories)
 router.get('/packages', verifyJWT, usercontroller.packages)
 router.get('/selectcategory/:id', usercontroller.selectcategory)
 router.get('/getSellerListings', verifyJWT, usercontroller.getSellerListings)

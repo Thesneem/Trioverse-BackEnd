@@ -264,6 +264,7 @@ module.exports = {
                     ]
                 }]
             })
+            console.log(hasOrdered)
             res.status(200).json({ hasOrdered })
         }
         catch (err) {

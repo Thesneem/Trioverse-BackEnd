@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
 const usermodel = require('../models/userModel')
-// const jwt = require('jsonwebtoken')
+
 require('dotenv').config(); // Load environment variables from .env file
-// const jwtSecret = process.env.JWT_SECRET;
 const categorymodel = require('../models/categoryModel');
 const packagemodel = require('../models/packagesModel');
 const packagesModel = require('../models/packagesModel');
 const { createToken } = require('../middleWares/JWTtoken')
+const ordermodel = require('../models/orderModel')
 
 
 
@@ -130,12 +130,14 @@ module.exports = {
             const id = req.params.id
             console.log(id)
             let { category } = req.body
+            const image = req.file.filename
+            console.log(image)
             category = category.trim().replace(/\s+/g, '-').toLowerCase()
             console.log(category)
-            const isExist = await categorymodel.findOne({ category: category }).exec();
+            const isExist = await categorymodel.find({ category: category }).exec();
             console.log(isExist);
-            if (!isExist) {
-                await categorymodel.findOneAndUpdate({ _id: id }, { $set: { category: category } })
+            if (isExist.length <= 1) {
+                await categorymodel.findOneAndUpdate({ _id: id }, { $set: { category: category, image: image } })
                     .then(() => {
                         res.status(201).json("success");
                     }).catch((err) => {
@@ -497,6 +499,112 @@ module.exports = {
 
             console.log(seller)
             res.status(201).json({ type: 'success' })
+        }
+        catch (err) {
+            console.log(err);
+            res.status(500).json({ type: 'error', message: 'An error occurred' });
+        }
+    },
+    getDashboardData: async (req, res, next) => {
+        try {
+            const userCount = await usermodel.countDocuments()
+            const sellerCount = await usermodel.find({ isSellerProfile_set: true }).countDocuments()
+            const orderCount = await ordermodel.find({
+                'order_Status.finished.state': true
+            }).countDocuments()
+            const pendingCount = await ordermodel.find({ $and: [{ sellerPayment_Status: 'pending' }, { 'order_Status.finished.state': true }] }).countDocuments()
+            console.log(userCount, sellerCount, orderCount, pendingCount)
+
+
+            // data for line chart
+            let salesChartDt = await ordermodel.aggregate([
+                {
+                    $match: {
+                        'order_Status.finished.state': true
+                    }
+                },
+                {
+                    $group: {
+                        _id: { day: { $dayOfWeek: "$order_Status.created.date" } },
+                        count: { $sum: 1 },
+                    },
+                },
+                {
+                    $sort: { _id: 1 },
+                },
+            ]);
+
+            let SalesCount = []
+            for (let i = 1; i < 8; i++) {
+                let found = false
+                for (let j = 0; j < salesChartDt.length; j++) {
+                    if (salesChartDt[j]._id.day == i) {
+                        SalesCount.push({ _id: { day: i }, count: salesChartDt[j].count })
+                        found = true
+                        break;
+                    }
+                }
+                if (!found) {
+                    SalesCount.push({ _id: { day: i }, count: 0 })
+                }
+            }
+            const salesCounts = SalesCount.map(d => d.count);
+            // const salesCountsJson = JSON.stringify(salesCounts);
+            // console.log(salesCountsJson)
+
+            res.status(200).json({ type: 'success', userCount, sellerCount, orderCount, pendingCount, salesCounts })
+        }
+        catch (err) {
+            console.log(err);
+            res.status(500).json({ type: 'error', message: 'An error occurred' });
+        }
+    },
+    getSalesReport: async (req, res, next) => {
+        try {
+            const { from, to } = req.query;
+
+            console.log(req.query)
+
+            const fromDate = new Date(`${from}T00:00:00Z`);
+            const toDate = new Date(`${to}T23:59:59Z`);
+            console.log(fromDate, toDate)
+
+            let salesData = await ordermodel.aggregate([
+                {
+                    $match: {
+                        'order_Status.finished.state': true,
+                        'order_Status.created.date': {
+                            $gte: new Date(fromDate.toISOString()),
+                            $lte: new Date(toDate.toISOString())
+                        }
+                    },
+                },
+                {
+                    $project: {
+                        'order_Status.created.date': { $dateToString: { format: "%Y-%m-%d", date: { $toDate: "$order_Status.created.date" } } },
+                        buyer_id: 1, seller_id: 1, selectedListing_title: 1, order_Price: 1
+                    },
+                },
+                {
+                    $lookup: {
+                        from: "users",
+                        localField: "buyer_id",
+                        foreignField: "_id",
+                        as: "buyer",
+                    },
+                }, {
+                    $lookup: {
+                        from: "users",
+                        localField: "seller_id",
+                        foreignField: "_id",
+                        as: "seller"
+                    }
+                },
+                { $sort: { 'order_Status.created.date': -1 } },
+            ]);
+            console.log(salesData)
+            res.status(200).json({ type: 'success', salesData })
+
         }
         catch (err) {
             console.log(err);

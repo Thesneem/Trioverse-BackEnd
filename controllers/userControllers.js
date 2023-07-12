@@ -365,15 +365,46 @@ module.exports = {
     },
     allListings: async (req, res, next) => {
         try {
-            const listings = await listingmodel.find({}).populate('seller_id')
-            console.log(listings)
-            res.status(200).json({ success: true, listings });
+            const { category, search, sort, page } = req.query;
+            console.log(req.query)
+            const filters = {};
 
-        }
-        catch (err) {
+            if (category && category !== 'All') {
+                filters['category.categoryId'] = category;
+            }
+
+            if (search && search !== 'null') {
+                filters.listingTitle = { $regex: search, $options: 'i' };
+            }
+
+            const pageSize = 4; // Number of listings per page
+            const pageNumber = parseInt(page) || 1; // Current page number
+
+            const countQuery = listingmodel.countDocuments(filters);
+            const totalListings = await countQuery.exec();
+
+            const listingsQuery = listingmodel.find(filters)
+                .populate('seller_id')
+                .sort({
+                    'packages.0.price': sort === 'desc' ? -1 : 1
+                })
+                .skip((pageNumber - 1) * pageSize)
+                .limit(pageSize);
+
+            const listings = await listingsQuery.exec();
+
+            res.status(200).json({
+                success: true,
+                listings,
+                currentPage: pageNumber,
+                totalPages: Math.ceil(totalListings / pageSize),
+            });
+        } catch (err) {
             console.log(err);
-            res.status(500).json({ message: "Something went wrong", success: false });
+            res.status(500).json({ message: 'Something went wrong', success: false });
         }
     }
+
+
 
 }
