@@ -9,7 +9,7 @@ const stripe = new Stripe(process.env.Stripe_API)
 module.exports = {
     stripe_PublishKey: async (req, res, next) => {
         return res.status(200).json({
-            success: 'OK', result: process.env.STRIPE_PUBLISH
+            success: 'OK', result: `${process.env.STRIPE_PUBLISH}`
         })
     },
 
