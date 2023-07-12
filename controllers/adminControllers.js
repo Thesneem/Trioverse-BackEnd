@@ -76,12 +76,15 @@ module.exports = {
             console.log('HIII')
             let { category } = req.body;
             console.log(category);
+            const image = req.file.filename
+            console.log(image)
             category = category.trim().replace(/\s+/g, '-').toLowerCase()
             const isExist = await categorymodel.findOne({ category: category }).exec();
             console.log(isExist);
             if (!isExist) {
                 const newCategory = await categorymodel({
-                    category
+                    category,
+                    image
                 });
                 newCategory.save().then(() => {
                     res.status(201).json("success");

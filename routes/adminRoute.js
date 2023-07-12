@@ -19,7 +19,7 @@ router.get('/getDashboardData', verifyJWT, admincontroller.getDashboardData)
 
 router.post('/login', admincontroller.adminLogin)
 router.post('/editUser/:id', admincontroller.editUser)
-router.post('/addCategory', verifyJWT, admincontroller.addCategory)
+router.post('/addCategory', uploadImage.single("image"), verifyJWT, admincontroller.addCategory)
 router.post('/editCategory/:id', uploadImage.single("image"), admincontroller.editCategory)
 router.post('/addSubCategory', admincontroller.addSubCategory)
 router.post('/editSubCategory/:id', admincontroller.editSubCategory)
