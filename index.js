@@ -26,9 +26,8 @@ app.use(function (err, req, res, next) {
 
 
 app.use(cors({
-    origin: [REACT],
-    method: ["GET", "POST"],
-    credentials: true,
+    origin: REACT
+
 })
 );
 
