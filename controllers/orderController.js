@@ -26,7 +26,8 @@ module.exports = {
             console.log(parsedListing, parsedItem)
 
             const paymentIntent = await stripe.paymentIntents.create({
-                amount: parsedItem?.price,
+                // amount: parsedItem?.price,
+                amount: 1000,
                 currency: "INR",
                 automatic_payment_methods: {
                     enabled: true,
