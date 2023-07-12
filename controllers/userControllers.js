@@ -367,7 +367,9 @@ module.exports = {
         try {
             const { category, search, sort, page } = req.query;
             console.log(req.query)
-            const filters = {};
+            const filters = {
+                listing_status: 'Available' // Filter for available listings only
+            };
 
             if (category && category !== 'All') {
                 filters['category.categoryId'] = category;
