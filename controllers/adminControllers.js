@@ -618,7 +618,7 @@ module.exports = {
         try {
             const orders = await ordermodel.find({
                 'order_Status.created.state': true
-            })
+            }).populate('seller_id').populate('listing_id').populate('buyer_id')
             res.status(200).json({ type: 'success', orders })
 
         }
