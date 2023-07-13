@@ -616,7 +616,7 @@ module.exports = {
     },
     getOrders: async (req, res, next) => {
         try {
-            const orders = await ordermodell.find({
+            const orders = await ordermodel.find({
                 'order_Status.created.state': true
             })
             res.status(200).json({ type: 'success', orders })
