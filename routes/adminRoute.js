@@ -14,6 +14,7 @@ router.get('/getSubCategory/:id', admincontroller.getSubcategory)
 router.get('/packages', verifyJWT, admincontroller.packages)
 router.get('/getPackage/:id', admincontroller.getPackage)
 router.get('/getDashboardData', verifyJWT, admincontroller.getDashboardData)
+router.get('/getOrders', admincontroller.getOrders)
 
 
 

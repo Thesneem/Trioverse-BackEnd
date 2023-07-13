@@ -613,5 +613,18 @@ module.exports = {
             console.log(err);
             res.status(500).json({ type: 'error', message: 'An error occurred' });
         }
+    },
+    getOrders: async (req, res, next) => {
+        try {
+            const orders = await ordermodell.find({
+                'order_Status.created.state': true
+            })
+            res.status(200).json({ type: 'success', orders })
+
+        }
+        catch (err) {
+            console.log(err);
+            res.status(500).json({ type: 'error', message: 'An error occurred' });
+        }
     }
 }
