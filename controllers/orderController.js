@@ -9,7 +9,7 @@ const stripe = new Stripe(process.env.Stripe_API)
 module.exports = {
     stripe_PublishKey: async (req, res, next) => {
         return res.status(200).json({
-            success: 'OK', result: `${process.env.STRIPE_PUBLISH}`
+            success: 'OK', result: `${process.env.Stripe_PUBLISH}`
         })
     },
 
@@ -26,8 +26,7 @@ module.exports = {
             console.log(parsedListing, parsedItem)
 
             const paymentIntent = await stripe.paymentIntents.create({
-                // amount: parsedItem?.price,
-                amount: 1000,
+                amount: parsedItem?.price,
                 currency: "INR",
                 automatic_payment_methods: {
                     enabled: true,
