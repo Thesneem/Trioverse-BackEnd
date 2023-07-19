@@ -27,8 +27,10 @@ module.exports = {
         try {
             const { firstName, lastName, email, password, mobile } = req.body
             const isUserExist = await usermodel.findOne({ $or: [{ email: req.body.email }, { mobile: req.body.mobile }] })
+            //const isUserExist = await usermodel.findOne({ email: req.body.email })
+
             if (isUserExist) {
-                return res.status(200).json({ message: "user already exists", success: false });
+                return res.status(200).json({ message: "Email or Mobile already exists", success: false });
             }
             else {
                 signupData = {

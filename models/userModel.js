@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema({
     mobile: {
         type: Number,
         required: [true, "Mobile Number is required"],
-        unique: true
+         unique: true, 
     },
     status: {
         type: String,

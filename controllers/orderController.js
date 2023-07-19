@@ -20,7 +20,7 @@ module.exports = {
             const { requirement, listing, item } = req.body
             console.log('REQBODY GOT FROM CHECKOUT', req.body)
             console.log(req.user.id)
-            const file = req.file.filename
+            const file = req.file?.filename
             const parsedListing = JSON.parse(listing);
             const parsedItem = JSON.parse(item);
             console.log(parsedListing, parsedItem)
@@ -41,7 +41,7 @@ module.exports = {
                 buyer_id: req.user.id,
                 seller_id: parsedListing.seller_id,
                 'order_requirements.requirements': requirement,
-                'order_requirements.file': file,
+                'order_requirements.file': file || null,
                 paymentIntent: paymentIntent.id,
                 order_Price: parsedItem?.price,
                 'order_Status.pending.state': true,
@@ -323,6 +323,18 @@ module.exports = {
 
             }
 
+        }
+        catch (err) {
+            console.log(err)
+            return res.status(500).json({ message: "Internal server error", success: false, err });
+        }
+    },
+    deleteReview: async (req, res, next) => {
+        try {
+            const id = req.params.id
+            console.log(id)
+            const rev = await reviewmodel.findByIdAndRemove({ _id: id })
+            res.status(200).json({ success: true })
         }
         catch (err) {
             console.log(err)

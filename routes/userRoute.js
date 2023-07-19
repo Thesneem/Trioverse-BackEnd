@@ -67,6 +67,6 @@ router.get('/allReviews/:id', ordercontroller.allReviews)
 router.get('/isReviewExist/:id', verifyJWT, ordercontroller.isReviewExist)
 
 router.post('/addReview/:id', verifyJWT, ordercontroller.addReview)
-
+router.post('/deleteReview/:id', ordercontroller.deleteReview)
 
 module.exports = router;
